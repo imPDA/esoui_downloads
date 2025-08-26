@@ -1,4 +1,4 @@
-.env
+*.env
 .venv
 /data
 /data_pipeline/output
