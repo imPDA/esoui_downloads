@@ -170,6 +170,7 @@ def update_addons_info(addons: list[Addon]):
                 db_addon.category = addon.categoryId
                 db_addon.url = addon.fileInfoUri
             else:
+                get_run_logger().info(f'New addon added: {addon.title} ({addon.id}, by {addon.author})')
                 db_addon = AddonSchema(
                     esoui_id=addon.id,
                     title=addon.title,
@@ -188,14 +189,22 @@ def extract_latest_update(addons: list[Addon]):
     for addon in addons:
         insert_data.append({'esoui_id': addon.id, 'timestamp': addon.lastUpdate, 'version': addon.version, 'checksum': addon.checksum})
 
-    insert_updates = insert(UpdateSchema).values(insert_data).on_conflict_do_nothing()
+    insert_updates = (
+        insert(UpdateSchema)
+        .values(insert_data)
+        .on_conflict_do_nothing()
+        .returning(UpdateSchema.esoui_id)
+    )
 
     if len(insert_data) < 1:
         return
 
     with get_db() as session:
-        session.execute(insert_updates)
+        result = session.execute(insert_updates)
+        inserted_rows = result.fetchall()
         session.commit()
+    
+    get_run_logger().info(f'{len(inserted_rows)} addons updated')
 
 
 @flow
