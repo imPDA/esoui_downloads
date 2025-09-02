@@ -41,8 +41,8 @@ class AddonSchema(Base):
 class UpdateSchema(Base):
     __tablename__ = 'update'
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    esoui_id: Mapped[int] = mapped_column(primary_key=True)
+    timestamp: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
 
     version: Mapped[str] = mapped_column(nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     checksum: Mapped[str] = mapped_column(nullable=False)

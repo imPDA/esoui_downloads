@@ -18,7 +18,7 @@ import pandas as pd
 from pydantic import BaseModel, ConfigDict, Json, ValidationError, field_validator
 
 from common.infra.database.addons import create_tables, get_db
-from common.infra.database.schemas import AddonSchema, DownloadsSchema
+from common.infra.database.schemas import AddonSchema, DownloadsSchema, UpdateSchema
 
 from old_database import move_old_database
 
@@ -116,7 +116,7 @@ def compress_with_xz(input_path: Path):
         print('❌ xz/tar not installed!')
         raise
 
-    return Path(f'{input_path}.xz')   
+    return Path(f'{input_path}.xz')
 
 
 @task
@@ -181,6 +181,21 @@ def update_addons_info(addons: list[Addon]):
         session.commit()
 
 
+def extract_latest_update(addons: list[Addon]):
+    insert_data = []
+    for addon in addons:
+        insert_data.append({'esoui_id': addon.id, 'timestamp': addon.lastUpdate, 'version': addon.version, 'checksum': addon.checksum})
+
+    insert_updates = insert(UpdateSchema).values(insert_data)
+
+    if len(insert_data) < 1:
+        return
+
+    with get_db() as session:
+        session.execute(insert_updates).on_conflict_do_nothing()
+        session.commit()
+
+
 @flow
 def take_esoui_snapshot():
     initialize_database()
@@ -193,6 +208,7 @@ def take_esoui_snapshot():
     validated_data = validate(results)
     update_addons_info(validated_data)
     extract_downloads(validated_data)
+    extract_latest_update(validated_data)
 
 
 if __name__ == '__main__':
@@ -205,8 +221,8 @@ if __name__ == '__main__':
         )
     )
 
-    d2 = move_old_database.to_deployment(
-        name='move-old-database-deployment',
-    )
+    # d2 = move_old_database.to_deployment(
+    #     name='move-old-database-deployment',
+    # )
 
-    serve(d1, d2)
+    serve(d1)
