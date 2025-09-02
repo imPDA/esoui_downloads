@@ -182,6 +182,7 @@ def update_addons_info(addons: list[Addon]):
         session.commit()
 
 
+@task
 def extract_latest_update(addons: list[Addon]):
     insert_data = []
     for addon in addons:
