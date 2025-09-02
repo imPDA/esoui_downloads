@@ -15,7 +15,7 @@ from sqlalchemy import select
 from sqladmin import Admin
 
 from common.infra.database.addons import create_tables, get_db, engine
-from common.infra.database.schemas import DownloadsSchema, AddonSchema
+from common.infra.database.schemas import DownloadsSchema, AddonSchema, UpdateSchema
 
 from .admin import DownloadsAdmin, AddonAdmin
 
@@ -49,6 +49,11 @@ class DownloadResponse(BaseModel):
     y: list[int]
     author: Optional[str] = None
     max: Optional[int] = None
+
+
+class ReleaseResponse(BaseModel):
+    timestamp: datetime
+    version: str
 
 
 class Filters(BaseModel):
@@ -100,6 +105,31 @@ def get_downloads(filters: Filters) -> list[dict]:
     responce = []
     for data in plotly_data.values():
         responce.append(DownloadResponse(**data).model_dump(mode='json'))
+
+    return responce
+
+
+def get_releases(addon_id: int) -> list[ReleaseResponse]:
+    get_releases = (
+        select(
+            UpdateSchema.timestamp,
+            UpdateSchema.version,
+        )
+        .where(UpdateSchema.esoui_id == addon_id)
+        .order_by(UpdateSchema.timestamp.desc())
+    )
+
+    with get_db() as db:
+        releases = db.execute(get_releases).all()
+
+    responce = []
+    for release in releases:
+        responce.append(
+            ReleaseResponse(
+                timestamp=release.timestamp,
+                version=release.version,
+            ).model_dump(mode='json')
+        )
 
     return responce
 
@@ -162,11 +192,16 @@ async def addon_page(
 ):  
     filters = Filters(addons=[esoui_id])
     downloads = get_downloads(filters)
+    releases = get_releases(esoui_id)
     
     return templates.TemplateResponse(
         request=request,
         name='esoui-downloads-single.html',
-        context={'downloads': downloads, 'addon_name': downloads[0]['name']},
+        context={
+            'downloads': downloads, 
+            'addon_name': downloads[0]['name'],
+            'releases': releases,
+        }
     )
 
 

@@ -1,5 +1,8 @@
 let showlegend = true;
 
+let versionShapes = [];
+let versionAnnotations = [];
+
 const darkLayout = {
     plot_bgcolor: '#3a3e46',
     paper_bgcolor: '#3a3e46',
@@ -108,7 +111,11 @@ function updateChart(data) {
     });
 
     Plotly.newPlot('download-chart', data,
-    { ...darkLayout }, 
+    { 
+        ...currentLayout,
+        shapes: versionShapes,
+        annotations: versionAnnotations,
+    },
     {
         responsive: true,
         scrollZoom: true,
@@ -170,16 +177,14 @@ document.addEventListener('DOMContentLoaded', (event) => {
         if (this.checked) {
             document.body.classList.add('light-theme');
             themeText.textContent = 'Light Mode';
-
-            Plotly.relayout('download-chart', lightLayout);
-            layout = lightLayout;
+            currentLayout = lightLayout;
         } else {
             document.body.classList.remove('light-theme');
             themeText.textContent = 'Dark Mode';
-
-            Plotly.relayout('download-chart', darkLayout);
-            layout = darkLayout;
+            currentLayout = darkLayout;
         }
+
+        Plotly.relayout('download-chart', currentLayout);
     });
 
     window.addEventListener('resize', function() {
@@ -191,5 +196,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     //     Plotly.update('download-chart', {}, {showlegend: showlegend});
     // });
 
+    currentLayout = themeToggle.checked ? lightLayout : darkLayout;
     updateChart(data);
 });

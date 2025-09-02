@@ -1,3 +1,49 @@
 {% extends 'esoui-downloads.html' %}
 
 {% block title %}"{{ addon_name }}" Downloads Chart{% endblock %}
+
+{% block contextData %}{{ super() }}
+let releases = {{ releases | tojson }}
+
+versionShapes = releases.map((release, index) => {
+    return {
+        type: 'line',
+        x0: release.timestamp,
+        x1: release.timestamp,
+        y0: 0,
+        y1: 1,
+        yref: 'paper',
+        line: {
+        color: colors[index % colors.length],
+        width: 1,
+        dash: 'dash'
+        },
+        name: `version-${release.version}`,
+        opacity: 0.85,
+        hoverinfo: 'none'
+    };
+});
+
+versionAnnotations = releases.map((release, index) => {
+    return {
+        x: release.timestamp,
+        y: 1.02,
+        xref: 'x',
+        yref: 'paper',
+        text: `<b>${release.version}</b>`,
+        showarrow: false,
+        font: {
+        size: 14,
+        color: colors[index % colors.length],
+        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+        },
+        // bordercolor: release.color,
+        borderwidth: 1,
+        borderpad: 4,
+        textangle: -90,
+
+        xanchor: 'center',
+        yanchor: 'bottom'
+    };
+});
+{% endblock %}

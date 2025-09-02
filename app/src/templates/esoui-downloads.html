@@ -11,7 +11,7 @@
     
     <script src="/static/simpler-script.js"></script>
     <script>
-        let data = {{ downloads | tojson }}
+        {% block contextData %}let data = {{ downloads | tojson }}{% endblock %}
     </script>
 </head>
 <body>
