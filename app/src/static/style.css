@@ -232,3 +232,52 @@ input:checked + .slider:before {
         grid-template-columns: 1fr;
     }
 }
+
+/* --- */
+.legend-controls {
+    position: absolute;
+    top: 25px;
+    right: 45px;
+    z-index: 100;
+    display: flex;
+    gap: 8px;
+}
+
+.legend-btn {
+    background: rgba(78, 128, 254, 0.8);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.legend-btn:hover {
+    background: rgba(78, 128, 254, 1);
+}
+
+.light-theme .legend-btn {
+    background: rgba(52, 65, 91, 0.8);
+    color: #f5f7fa;
+}
+
+.light-theme .legend-btn:hover {
+    background: rgba(52, 65, 91, 1);
+}
+
+@media (max-width: 768px) {
+    .legend-controls {
+        top: 15px;
+        right: 25px;
+    }
+    
+    .legend-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
