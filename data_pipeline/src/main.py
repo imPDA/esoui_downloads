@@ -4,7 +4,8 @@ from pathlib import Path
 import subprocess
 from typing import Optional
 
-from sqlalchemy import insert, select
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
 from fake_useragent import UserAgent
 import requests
