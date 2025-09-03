@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
+import logging
 from pathlib import Path
 
+import shutil
 import subprocess
+import tempfile
 from typing import Optional
 
 from sqlalchemy import select
@@ -121,6 +124,25 @@ def compress_with_xz(input_path: Path):
 
 
 @task
+def decompress_with_xz(compressed_path: Path, output_dir: Path) -> Path:
+    temp_compressed_path = output_dir / compressed_path.name
+    shutil.copy2(compressed_path, temp_compressed_path)
+
+    subprocess.run(
+        ['xz', '-d', str(temp_compressed_path)],
+        check=True,
+        capture_output=True,
+        text=True
+    )
+
+    output_path = output_dir / compressed_path.stem
+    if not output_path.exists():
+        raise Exception('Decompressed file was not created!')
+
+    return output_path
+
+
+@task
 def extract_downloads(addons: list[Addon]):
     timestamp = flow_run.scheduled_start_time
 
@@ -201,10 +223,70 @@ def extract_latest_update(addons: list[Addon]):
 
     with get_db() as session:
         result = session.execute(insert_updates)
-        inserted_rows = result.fetchall()
+        rows_inserted = len(result.fetchall())
         session.commit()
+
+        return rows_inserted
+
+
+@task
+def find_parquet_xz_files():
+    output_path = Path(__file__).parent.parent / 'output'
+    PATTERN = '*.parquet.xz'
+
+    if not output_path.exists():
+        raise FileNotFoundError(f'Folder not found: {output_path}')
     
-    get_run_logger().info(f'{len(inserted_rows)} addons updated')
+    files = list(output_path.glob(PATTERN))
+    files.sort()
+    
+    get_run_logger().info(f'Found {len(files)} .parquet.xz files')
+
+    return files
+
+
+@task
+def load_parquet(parquet_path: Path) -> list[dict]:
+    df = pd.read_parquet(parquet_path)
+    records = df.to_dict(orient='records')
+
+    return records
+
+
+@task
+def process_single_file(compressed_path: Path, temp_dir: Path) -> dict:
+    get_run_logger().info(f'Processing {compressed_path}')
+
+    try:
+        parquet_path = decompress_with_xz(compressed_path, temp_dir)
+        addon_records = load_parquet(parquet_path)
+        
+        if not addon_records:
+            return
+        
+        addons = validate(addon_records)
+        rows_inserted = extract_latest_update(addons)
+
+        return rows_inserted
+    except Exception:
+        get_run_logger().exception(f'Failed to process {compressed_path}')
+
+
+@flow
+def extract_data_from_archive():
+    files = find_parquet_xz_files()
+
+    if not files:
+        return
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        
+        get_run_logger().setLevel(logging.WARNING)
+        for file_path in files:
+            rows_inserted = process_single_file(file_path, temp_path)
+            get_run_logger().info(f'{rows_inserted} addons updated (from {file_path.name})')
+        get_run_logger().setLevel(logging.INFO)
 
 
 @flow
@@ -235,5 +317,10 @@ if __name__ == '__main__':
     # d2 = move_old_database.to_deployment(
     #     name='move-old-database-deployment',
     # )
+    
+    d3 = extract_data_from_archive.to_deployment(
+        name='extract_data_from_archive-deploymant',
+    )
 
-    serve(d1)
+    # serve(d1, d3)
+    serve(d3)
