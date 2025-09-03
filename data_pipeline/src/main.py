@@ -322,5 +322,4 @@ if __name__ == '__main__':
         name='extract_data_from_archive-deploymant',
     )
 
-    # serve(d1, d3)
-    serve(d3)
+    serve(d1, d3)
