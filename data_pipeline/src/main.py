@@ -282,11 +282,11 @@ def extract_data_from_archive():
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
         
-        get_run_logger().setLevel(logging.WARNING)
         for file_path in files:
+            get_run_logger().setLevel(logging.WARNING)
             rows_inserted = process_single_file(file_path, temp_path)
+            get_run_logger().setLevel(logging.INFO)
             get_run_logger().info(f'{rows_inserted} addons updated (from {file_path.name})')
-        get_run_logger().setLevel(logging.INFO)
 
 
 @flow
