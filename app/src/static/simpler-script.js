@@ -101,7 +101,7 @@ const colors = [
 
 function updateChart(data) {
     data.forEach((item, index) => {
-        item.type = 'scatter';
+        item.type = 'scattergl';
         item.mode = 'lines';
         item.line = { 
             color: colors[index % colors.length],
@@ -128,8 +128,6 @@ function updateChart(data) {
 }
 
 document.addEventListener('DOMContentLoaded', (event) => {
-    console.log('DOM fully loaded and parsed');
-
     Plotly.newPlot('download-chart', [], { ...darkLayout }, 
     {
         responsive: true,
@@ -171,16 +169,11 @@ document.addEventListener('DOMContentLoaded', (event) => {
     // });
 
     const themeToggle = document.getElementById('theme-toggle');
-    const themeText = document.querySelector('.theme-text');
 
     themeToggle.addEventListener('change', function() {
         if (this.checked) {
-            document.body.classList.add('light-theme');
-            themeText.textContent = 'Light Mode';
             currentLayout = lightLayout;
         } else {
-            document.body.classList.remove('light-theme');
-            themeText.textContent = 'Dark Mode';
             currentLayout = darkLayout;
         }
 
