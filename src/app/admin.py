@@ -1,7 +1,7 @@
 from sqladmin import ModelView
 from sqladmin.filters import AllUniqueStringValuesFilter
 
-from common.infra.database.schemas import AddonSchema, DownloadsSchema
+from core.schemas import AddonSchema, DownloadsSchema
 
 
 class DownloadsAdmin(ModelView, model=DownloadsSchema):

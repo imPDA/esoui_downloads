@@ -1,21 +1,11 @@
 from datetime import datetime
-import os
 import sqlite3
 
 from prefect import flow, task
-from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.orm import sessionmaker
 
-from common.infra.database.schemas import DownloadsSchema
-from common.infra.database.addons import create_tables
-
-
-DATABASE_URL = f'postgresql://{os.getenv('ADDONS_USERNAME')}:{os.getenv('ADDONS_PASSWORD')}@{os.getenv('ADDONS_DATABASE_HOST')}:{os.getenv('ADDONS_DATABASE_PORT')}/{os.getenv('ADDONS_DATABASE_NAME')}'
-
-
-ENGINE = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=ENGINE)
+from core.database import create_tables, Session
+from core.schemas import DownloadsSchema
 
 
 @task
@@ -69,6 +59,6 @@ def fill_from_sqlite(sqlite_path: str):
 
 @flow
 def move_old_database(sqlite_path: str):
-    create_tables(ENGINE)
+    create_tables()
 
     fill_from_sqlite(sqlite_path)

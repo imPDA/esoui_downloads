@@ -1,0 +1,22 @@
+{% extends 'base.jinja' %}
+
+{% block tab_title %}ESO Addons Search{% endblock %}
+{% block page_title %}ESO Addons Search{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/search.js"></script>
+{% endblock %}
+
+{% block main_content %}
+<div class="search-container">
+    <div class="search-wrapper">
+        <div class="search-input-container">
+            <input type="text" class="search-input" placeholder="Search by author, addon name, or addon ID...">
+            <div class="loader" id="loader"></div>
+            <i class="fas fa-search search-icon"></i>
+        </div>
+        <div class="results-container" id="results-container"></div>
+        <div class="search-info">Type at least 3 characters to search</div>
+    </div>
+</div>
+{% endblock %}

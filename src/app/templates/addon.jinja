@@ -1,9 +1,11 @@
-{% extends 'esoui-downloads.html' %}
+{% extends 'downloads.jinja' %}
 
-{% block title %}"{{ addon_name }}" Downloads Chart{% endblock %}
+{% block tab_title %}"{{ addon_name }}" Downloads Chart{% endblock %}
+{% block page_title %}"{{ addon_name }}" Downloads Chart{% endblock %}
 
-{% block contextData %}{{ super() }}
-let releases = {{ releases | tojson }}
+{% block scripts %}{{ super() }}
+<script>
+const releases = {{ releases | tojson }}
 
 versionShapes = releases.map((release, index) => {
     return {
@@ -14,9 +16,9 @@ versionShapes = releases.map((release, index) => {
         y1: 1,
         yref: 'paper',
         line: {
-        color: colors[index % colors.length],
-        width: 1,
-        dash: 'dash'
+            color: colors[index % colors.length],
+            width: 1,
+            dash: 'dash',
         },
         name: `version-${release.version}`,
         opacity: 0.85,
@@ -33,9 +35,9 @@ versionAnnotations = releases.map((release, index) => {
         text: `<b>${release.version}</b>`,
         showarrow: false,
         font: {
-        size: 14,
-        color: colors[index % colors.length],
-        family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+            size: 14,
+            color: colors[index % colors.length],
+            family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
         },
         // bordercolor: release.color,
         borderwidth: 1,
@@ -46,4 +48,7 @@ versionAnnotations = releases.map((release, index) => {
         yanchor: 'bottom'
     };
 });
+
+const download_speed = {{download_speed | tojson }}
+</script>
 {% endblock %}

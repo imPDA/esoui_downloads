@@ -26,6 +26,17 @@ class DownloadsSchema(Base):
     downloads: Mapped[int] = mapped_column(nullable=False)
 
 
+# class DownloadSpeed(Base):
+#     __tablename__ = 'download_speeds'
+    
+#     esoui_id: Mapped[int] = mapped_column(ForeignKey('addon.esoui_id'), primary_key=True)
+#     timestamp: Mapped[datetime] = mapped_column(DateTime, primary_key=True)
+#     downloads_per_hour: Mapped[float] = mapped_column(nullable=True)
+#     time_diff_minutes: Mapped[float] = mapped_column(nullable=True)
+#     is_gap: Mapped[bool] = mapped_column(default=False)
+#     calculated_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
 class AddonSchema(Base):
     __tablename__ = 'addon'
 

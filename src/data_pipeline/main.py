@@ -5,7 +5,6 @@ from pathlib import Path
 import shutil
 import subprocess
 import tempfile
-from typing import Optional
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
@@ -19,12 +18,11 @@ from prefect.schedules import Interval
 
 import pandas as pd
 
-from pydantic import BaseModel, ConfigDict, Json, ValidationError, field_validator
+from pydantic import ValidationError
 
-from common.infra.database.addons import create_tables, get_db
-from common.infra.database.schemas import AddonSchema, DownloadsSchema, UpdateSchema
-
-from old_database import move_old_database
+from core.database import create_tables, get_db
+from core.schemas import AddonSchema, DownloadsSchema, UpdateSchema
+from .models import Addon
 
 
 API_URL = 'https://api.mmoui.com/v4/game/ESO/filelist.json'
@@ -38,32 +36,6 @@ FAKE_HEADERS = {
     'Upgrade-Insecure-Requests': '1',
     # 'Accept-Encoding': 'gzip, deflate, br, zstd',
 }
-
-
-class Addon(BaseModel):
-    model_config = ConfigDict(extra='ignore')
-    
-    id: int
-    categoryId: int
-    version: str
-    lastUpdate: datetime
-    title: str
-    author: str
-    fileInfoUri: str
-    downloads: int
-    downloadsMonthly: int
-    favorites: int
-    gameVersions: Optional[list[str]] = None
-    checksum: str
-
-    @field_validator('lastUpdate', mode='before')
-    @classmethod
-    def convert_unix_timestamp(cls, value):
-        if isinstance(value, int):
-            if value > 9999999999:
-                value = value / 1000
-            return datetime.fromtimestamp(value)
-        return value
 
 
 @task
@@ -305,7 +277,7 @@ def take_esoui_snapshot():
 
 
 if __name__ == '__main__':
-    d1 = take_esoui_snapshot.to_deployment(
+    take_snapshot_deployment = take_esoui_snapshot.to_deployment(
         name='take-esoui-snapshot-deployment', 
         schedule=Interval(
             timedelta(minutes=30),
@@ -313,13 +285,12 @@ if __name__ == '__main__':
             timezone='Europe/Moscow'
         )
     )
-
-    # d2 = move_old_database.to_deployment(
-    #     name='move-old-database-deployment',
-    # )
     
-    d3 = extract_data_from_archive.to_deployment(
+    extract_data_from_archive_deployment = extract_data_from_archive.to_deployment(
         name='extract_data_from_archive-deploymant',
     )
 
-    serve(d1, d3)
+    serve(
+        take_snapshot_deployment,
+        extract_data_from_archive_deployment,
+    )

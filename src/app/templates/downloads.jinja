@@ -1,0 +1,30 @@
+{% extends 'base.jinja' %}
+
+{% block tab_title %}ESOUI Downloads Chart{% endblock %}
+{% block page_title %}ESOUI Downloads Chart{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="/static/css/style.css">
+{% endblock %}
+
+{% block scripts %}{{ super() }}
+{# <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.0/dist/chartjs-plugin-zoom.min.js"></script> #}
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<script src="/static/js/chart.js"></script>
+<script> let data = {{ downloads | tojson }}; </script>
+{% endblock %}
+
+{% block main_content %}
+<div class="chart-container">
+    {# <div class="legend-controls">
+        <button class="legend-btn" id="toggle-legend">
+            <i class="fas fa-list"></i> Toggle Legend
+        </button>
+    </div> #}
+    <div id="download-chart"></div>
+    {# <canvas id="download-chart"></canvas> #}
+</div>
+{% endblock %}
