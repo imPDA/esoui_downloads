@@ -21,6 +21,14 @@ def get_db():
     finally:
         db.close()
 
+@contextmanager
+def get_db_cm():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 def create_tables():
     Base.metadata.create_all(bind=ENGINE)

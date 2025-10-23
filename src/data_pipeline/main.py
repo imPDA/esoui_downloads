@@ -20,7 +20,7 @@ import pandas as pd
 
 from pydantic import ValidationError
 
-from core.database import create_tables, get_db
+from core.database import create_tables, get_db_cm
 from core.schemas import AddonSchema, DownloadsSchema, UpdateSchema
 from models import Addon
 
@@ -127,7 +127,7 @@ def extract_downloads(addons: list[Addon]):
     if len(insert_data) < 1:
         return
 
-    with get_db() as session:
+    with get_db_cm() as session:
         session.execute(insert_downloads)
         session.commit()
 
@@ -154,7 +154,7 @@ def update_addons_info(addons: list[Addon]):
         .where(AddonSchema.esoui_id == esoui_id)
     )
 
-    with get_db() as session:
+    with get_db_cm() as session:
         for addon in addons:
             db_addon = session.scalars(get_addon(addon.id)).one_or_none()
 
@@ -193,7 +193,7 @@ def extract_latest_update(addons: list[Addon]):
     if len(insert_data) < 1:
         return
 
-    with get_db() as session:
+    with get_db_cm() as session:
         result = session.execute(insert_updates)
         rows_inserted = len(result.fetchall())
         session.commit()
