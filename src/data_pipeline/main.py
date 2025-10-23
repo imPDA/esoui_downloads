@@ -22,7 +22,7 @@ from pydantic import ValidationError
 
 from core.database import create_tables, get_db
 from core.schemas import AddonSchema, DownloadsSchema, UpdateSchema
-from .models import Addon
+from models import Addon
 
 
 API_URL = 'https://api.mmoui.com/v4/game/ESO/filelist.json'

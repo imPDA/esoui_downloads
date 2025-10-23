@@ -1,25 +1,11 @@
-# FROM python:3.13-slim
-
-# WORKDIR /app
-
-# RUN apt-get update && apt-get install -y \
-#     gcc \
-#     && rm -rf /var/lib/apt/lists/*
-
-# COPY ./app/requirements.txt .
-# RUN pip install --no-cache-dir -r requirements.txt
-
-# COPY ./src /app
-
-# CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--workers", "4"]
-
-
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim
 
 # RUN groupadd --system --gid 999 nonroot \
 #  && useradd --system --gid 999 --uid 999 --create-home nonroot
 
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONPATH="/app:$PYTHONPATH"
 
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
